@@ -1,22 +1,18 @@
--- ============================================================
+
 -- SkillSwap: A Peer-to-Peer Skill Exchange System
 -- DATABASE MANAGEMENT SYSTEM (PBL)
--- JIGYASA SRIVASTAVA | RIDDHIMA BHATNAGAR | RAJAN PALTA
--- Batch: B16, B.Tech. CSE
--- ============================================================
 
 
--- ============================================================
+
 -- DATABASE CREATION
--- ============================================================
+
 
 CREATE DATABASE dbmsProject;
 USE dbmsProject;
 
 
--- ============================================================
 -- TABLE CREATION
--- ============================================================
+
 
 -- 1. USERS TABLE
 CREATE TABLE users(
@@ -113,9 +109,7 @@ CREATE TABLE matches(
 );
 
 
--- ============================================================
 -- UPDATIONS (INDEXES & ALTER)
--- ============================================================
 
 CREATE INDEX idx_user_college_name ON users(college_name);
 CREATE INDEX idx_user_skill ON skills(skill_id);
@@ -124,11 +118,9 @@ CREATE INDEX idx_avail_user ON availability(user_id);
 ALTER TABLE users MODIFY phone varchar(10);
 
 
--- ============================================================
 -- INSERTION
--- ============================================================
 
--- Users (50 records)
+-- Users 
 INSERT INTO users (user_id, user_name, full_name, email, phone, location, college_name) VALUES
 (1, 'arjun_iyer', 'Arjun Iyer', 'arjun.iyer@iitm.ac.in', '9876543210', 'chennai', 'iit madras'),
 (2, 'priya_reddy', 'Priya Reddy', 'priya.reddy@iitm.ac.in', '9876543211', 'chennai', 'iit madras'),
@@ -181,7 +173,7 @@ INSERT INTO users (user_id, user_name, full_name, email, phone, location, colleg
 (49, 'rahul_iyer', 'Rahul Iyer', 'rahul.iyer@iitb.ac.in', '9876543258', 'mumbai', 'iit bombay'),
 (50, 'isha_singla', 'Isha Singla', 'isha.singla@iitb.ac.in', '9876543259', 'mumbai', 'iit bombay');
 
--- Skills (25 records)
+-- Skills 
 INSERT INTO skills (skill_id, skill_name, skill_describe) VALUES
 (101, 'python programming', 'learn to code in python from basics to advanced with projects.'),
 (102, 'data analysis', 'analyze datasets using excel, sql, and python for insights.'),
@@ -209,7 +201,7 @@ INSERT INTO skills (skill_id, skill_name, skill_describe) VALUES
 (124, 'event management', 'plan and organize college and cultural events effectively.'),
 (125, 'social media content creation', 'create instagram reels and youtube videos that engage audiences.');
 
--- User Skills (40 records)
+-- User Skills 
 INSERT INTO user_skills (user_skill_id, user_id, skill_id, role, proficiency) VALUES
 (201, 1, 101, 'teach', 'advanced'),
 (202, 1, 104, 'teach', 'advanced'),
@@ -252,7 +244,7 @@ INSERT INTO user_skills (user_skill_id, user_id, skill_id, role, proficiency) VA
 (239, 20, 113, 'learn', 'beginner'),
 (240, 20, 114, 'learn', 'beginner');
 
--- Availability (50 records)
+-- Availability 
 INSERT INTO availability (avail_id, user_id, date_avail, start_time, end_time) VALUES
 (301, 1, '2025-11-12', '09:00:00', '11:00:00'),
 (302, 2, '2025-11-12', '10:00:00', '12:00:00'),
@@ -305,7 +297,7 @@ INSERT INTO availability (avail_id, user_id, date_avail, start_time, end_time) V
 (349, 49, '2025-11-24', '09:00:00', '11:00:00'),
 (350, 50, '2025-11-24', '11:00:00', '13:00:00');
 
--- Sessions (20 records)
+-- Sessions 
 INSERT INTO sessions (session_id, teacher_id, learner_id, skill_id, scheduled_start, scheduled_end, status) VALUES
 (401, 1, 2, 101, '2025-11-12 10:30:00', '2025-11-12 11:30:00', 'completed'),
 (402, 3, 4, 104, '2025-11-13 15:30:00', '2025-11-13 16:30:00', 'completed'),
@@ -328,7 +320,7 @@ INSERT INTO sessions (session_id, teacher_id, learner_id, skill_id, scheduled_st
 (419, 37, 38, 121, '2025-11-21 11:30:00', '2025-11-21 12:30:00', 'scheduled'),
 (420, 39, 40, 122, '2025-11-21 15:30:00', '2025-11-21 16:30:00', 'completed');
 
--- Feedback (12 records)
+-- Feedback 
 INSERT INTO feedback (feedback_id, session_id, from_user_id, to_user_id, rating, comments) VALUES
 (501, 401, 2, 1, 5, 'arjun explained python basics very clearly. great session!'),
 (502, 402, 3, 4, 4, 'aisha was great at explaining machine learning models.'),
@@ -343,7 +335,7 @@ INSERT INTO feedback (feedback_id, session_id, from_user_id, to_user_id, rating,
 (511, 417, 34, 33, 5, 'krishna was fantastic at explaining leadership principles.'),
 (512, 420, 40, 39, 5, 'deepaks photography session was insightful and hands-on.');
 
--- Notifications (20 records)
+-- Notifications 
 INSERT INTO notifications (notif_id, user_id, message, is_read) VALUES
 (601, 2, 'your python session with arjun iyer has been completed.', 1),
 (602, 3, 'machine learning session with aisha khan completed successfully.', 1),
@@ -366,7 +358,7 @@ INSERT INTO notifications (notif_id, user_id, message, is_read) VALUES
 (619, 38, 'career guidance session with arnav bansal scheduled for 21st nov.', 0),
 (620, 40, 'photography session with deepak sharma completed successfully.', 1);
 
--- Matches (25 records)
+-- Matches 
 INSERT INTO matches (match_id, requester_id, candidate_id, skill_id, score) VALUES
 (701, 2, 1, 101, 92.5),
 (702, 3, 4, 104, 88.0),
@@ -394,10 +386,8 @@ INSERT INTO matches (match_id, requester_id, candidate_id, skill_id, score) VALU
 (724, 48, 47, 101, 91.5),
 (725, 50, 49, 102, 90.0);
 
-
--- ============================================================
 -- QUERIES - LEVEL 01
--- ============================================================
+
 
 -- Completed sessions
 SELECT * FROM sessions WHERE status='completed';
@@ -415,9 +405,8 @@ SELECT user_id FROM availability WHERE date_avail='2025-11-14';
 SELECT * FROM user_skills ORDER BY skill_id DESC;
 
 
--- ============================================================
 -- QUERIES - LEVEL 02
--- ============================================================
+
 
 -- Total users
 SELECT count(*) as total_users FROM users;
@@ -450,9 +439,7 @@ SELECT date_avail, count(user_id) as total_users FROM availability GROUP BY date
 SELECT min(scheduled_start) as first_session FROM sessions;
 
 
--- ============================================================
 -- JOINS
--- ============================================================
 
 -- Feedback with full names of sender and receiver
 SELECT f.feedback_id, u1.full_name as from_user, u2.full_name as to_user, f.rating, f.comments
@@ -500,10 +487,7 @@ SELECT user_id, count(*) as total_sessions
     ORDER BY total_sessions DESC
     LIMIT 3;
 
-
--- ============================================================
 -- SUBQUERIES
--- ============================================================
 
 -- Teachers with completed sessions
 SELECT DISTINCT teacher_id FROM sessions WHERE status = 'completed';
@@ -539,9 +523,7 @@ SELECT skill_id, count(*) as teachers
     GROUP BY skill_id;
 
 
--- ============================================================
 -- STORED PROCEDURES
--- ============================================================
 
 DELIMITER $$
 
@@ -595,9 +577,7 @@ CALL get_best_matches(8);
 CALL get_all_users();
 
 
--- ============================================================
 -- FUNCTIONS
--- ============================================================
 
 DELIMITER $$
 
@@ -664,9 +644,8 @@ SELECT count_teaching_skills(2);
 SELECT best_match_score(8);
 
 
--- ============================================================
 -- CURSORS (inside stored procedures)
--- ============================================================
+
 
 DELIMITER $$
 
@@ -766,10 +745,8 @@ CREATE PROCEDURE cursor_best_match()
 
 DELIMITER ;
 
-
--- ============================================================
 -- TRIGGERS
--- ============================================================
+
 
 DELIMITER $$
 
