@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillSwap</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0a0f;
+    --bg2:       #111118;
+    --bg3:       #1a1a24;
+    --border:    #2a2a3a;
+    --accent:    #7c6af7;
+    --accent2:   #f7c66a;
+    --accent3:   #6af7c6;
+    --text:      #e8e8f0;
+    --muted:     #7a7a9a;
+    --danger:    #f76a6a;
+    --success:   #6af7a0;
+    --card-r:    16px;
+    --font-h:    'Syne', sans-serif;
+    --font-b:    'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-b); min-height: 100vh; overflow-x: hidden; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem; height: 64px;
+    background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: var(--font-h); font-size: 1.4rem; font-weight: 800;
+    background: linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
+  .nav-links { display: flex; gap: 0.25rem; }
+  .nav-link { background: none; border: none; color: var(--muted); font-family: var(--font-b);
+    font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all .2s; }
+  .nav-link:hover { color: var(--text); background: var(--bg3); }
+  .nav-link.active { color: var(--accent); background: rgba(124,106,247,.12); }
+  .nav-cta { background: var(--accent); color: #fff; border: none; font-family: var(--font-b);
+    font-size: 0.85rem; font-weight: 500; padding: 0.5rem 1.2rem; border-radius: 8px; cursor: pointer; transition: opacity .2s; }
+  .nav-cta:hover { opacity: .85; }
+
+  /* ── PAGE ── */
+  .page { display: none; padding-top: 64px; min-height: 100vh; animation: fadeIn .35s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; padding: 7rem 2.5rem 5rem; text-align: center;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,106,247,.18) 0%, transparent 70%);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237c6af7' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-badge { display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(124,106,247,.12); border: 1px solid rgba(124,106,247,.3);
+    color: var(--accent); font-size: .8rem; padding: .35rem 1rem; border-radius: 99px; margin-bottom: 2rem; }
+  .hero h1 { font-family: var(--font-h); font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 800;
+    line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 1.5rem; }
+  .hero h1 span { background: linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { font-size: 1.15rem; color: var(--muted); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+  .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: var(--accent); color: #fff; border: none; font-family: var(--font-b);
+    font-size: .95rem; font-weight: 500; padding: .8rem 2rem; border-radius: 10px; cursor: pointer; transition: all .2s; }
+  .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+  .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text);
+    font-family: var(--font-b); font-size: .95rem; padding: .8rem 2rem; border-radius: 10px; cursor: pointer; transition: all .2s; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.5rem; padding: 0 2.5rem 4rem; max-width: 1100px; margin: 0 auto; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-r);
+    padding: 1.5rem; text-align: center; transition: border-color .2s; }
+  .stat-card:hover { border-color: var(--accent); }
+  .stat-num { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; color: var(--accent2); }
+  .stat-label { font-size: .85rem; color: var(--muted); margin-top: .3rem; }
+
+  /* ── SECTION ── */
+  .section { padding: 3rem 2.5rem; max-width: 1100px; margin: 0 auto; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; }
+  .section-title { font-family: var(--font-h); font-size: 1.5rem; font-weight: 700; }
+  .section-link { font-size: .85rem; color: var(--accent); cursor: pointer; border: none; background: none;
+    font-family: var(--font-b); transition: opacity .2s; }
+  .section-link:hover { opacity: .7; }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 1.25rem; }
+
+  /* ── SKILL CARD ── */
+  .skill-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-r);
+    padding: 1.5rem; transition: all .2s; cursor: pointer; }
+  .skill-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,106,247,.1); }
+  .skill-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+  .skill-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.2rem;
+    background: linear-gradient(135deg,rgba(124,106,247,.2),rgba(124,106,247,.05)); }
+  .skill-cat { font-size: .72rem; padding: .25rem .7rem; border-radius: 99px;
+    background: rgba(124,106,247,.12); color: var(--accent); font-weight: 500; }
+  .skill-name { font-family: var(--font-h); font-weight: 600; font-size: 1rem; margin-bottom: .4rem; }
+  .skill-desc { font-size: .83rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+  .skill-footer { display: flex; gap: 1rem; font-size: .78rem; color: var(--muted); }
+  .skill-footer span { display: flex; align-items: center; gap: .3rem; }
+
+  /* ── USER CARD ── */
+  .user-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-r);
+    padding: 1.5rem; transition: all .2s; }
+  .user-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .user-avatar { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; font-family: var(--font-h); font-size: 1.3rem; font-weight: 700;
+    margin-bottom: 1rem; }
+  .user-name { font-family: var(--font-h); font-weight: 600; font-size: 1rem; margin-bottom: .2rem; }
+  .user-college { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+  .user-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .tag { font-size: .72rem; padding: .2rem .6rem; border-radius: 6px; font-weight: 500; }
+  .tag-teach { background: rgba(106,247,198,.1); color: var(--accent3); }
+  .tag-learn { background: rgba(247,198,106,.1); color: var(--accent2); }
+  .stars { color: var(--accent2); font-size: .8rem; margin-top: .75rem; }
+
+  /* ── SESSION TABLE ── */
+  .table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-r); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 1rem 1.25rem; text-align: left; font-size: .78rem; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); border-bottom: 1px solid var(--border);
+    font-family: var(--font-h); font-weight: 600; }
+  td { padding: .9rem 1.25rem; font-size: .88rem; border-bottom: 1px solid rgba(42,42,58,.5); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(124,106,247,.04); }
+
+  .badge { display: inline-block; font-size: .72rem; padding: .25rem .65rem; border-radius: 6px; font-weight: 600; }
+  .badge-completed  { background: rgba(106,247,160,.12); color: var(--success); }
+  .badge-scheduled  { background: rgba(106,170,247,.12); color: #6aaaf7; }
+  .badge-cancelled  { background: rgba(247,106,106,.12); color: var(--danger); }
+  .badge-rescheduled{ background: rgba(247,198,106,.12); color: var(--accent2); }
+
+  /* ── DASHBOARD ── */
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+  .dash-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--card-r);
+    padding: 1.5rem; }
+  .dash-card-label { font-size: .8rem; color: var(--muted); margin-bottom: .5rem; text-transform: uppercase; letter-spacing: .06em; }
+  .dash-card-value { font-family: var(--font-h); font-size: 2rem; font-weight: 800; }
+  .dash-card-sub { font-size: .8rem; color: var(--muted); margin-top: .3rem; }
+
+  /* ── SEARCH / FILTER BAR ── */
+  .filter-bar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .search-input { flex: 1; min-width: 200px; background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font-b); font-size: .9rem; padding: .7rem 1rem;
+    border-radius: 10px; outline: none; transition: border-color .2s; }
+  .search-input:focus { border-color: var(--accent); }
+  .filter-select { background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+    font-family: var(--font-b); font-size: .9rem; padding: .7rem 1rem; border-radius: 10px;
+    outline: none; cursor: pointer; }
+  .filter-select:focus { border-color: var(--accent); }
+
+  /* ── LEADERBOARD ── */
+  .lb-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(42,42,58,.5); transition: background .2s; }
+  .lb-row:hover { background: rgba(124,106,247,.04); }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { font-family: var(--font-h); font-size: 1rem; font-weight: 800; width: 32px;
+    text-align: center; color: var(--muted); }
+  .lb-rank.gold   { color: #ffd700; }
+  .lb-rank.silver { color: #c0c0c0; }
+  .lb-rank.bronze { color: #cd7f32; }
+  .lb-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-family: var(--font-h); font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+  .lb-info { flex: 1; }
+  .lb-name { font-weight: 500; font-size: .92rem; }
+  .lb-college { font-size: .78rem; color: var(--muted); }
+  .lb-rating { display: flex; align-items: center; gap: .4rem; font-family: var(--font-h); font-weight: 700; }
+
+  /* ── NOTIF ── */
+  .notif-item { padding: 1rem 1.25rem; border-bottom: 1px solid rgba(42,42,58,.5);
+    display: flex; gap: 1rem; align-items: flex-start; }
+  .notif-item.unread { background: rgba(124,106,247,.04); }
+  .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    margin-top: .35rem; flex-shrink: 0; }
+  .notif-dot.read { background: var(--border); }
+  .notif-msg { font-size: .88rem; line-height: 1.6; }
+  .notif-time { font-size: .75rem; color: var(--muted); margin-top: .25rem; }
+
+  /* ── PROFILE ── */
+  .profile-hero { background: linear-gradient(135deg,rgba(124,106,247,.15),rgba(247,198,106,.08));
+    border: 1px solid var(--border); border-radius: var(--card-r); padding: 2rem; margin-bottom: 2rem;
+    display: flex; gap: 2rem; align-items: center; }
+  .profile-avatar { width: 80px; height: 80px; border-radius: 18px; display: flex;
+    align-items: center; justify-content: center; font-family: var(--font-h);
+    font-size: 2rem; font-weight: 800; flex-shrink: 0;
+    background: linear-gradient(135deg,var(--accent),var(--accent2)); }
+  .profile-name { font-family: var(--font-h); font-size: 1.6rem; font-weight: 800; }
+  .profile-meta { font-size: .88rem; color: var(--muted); margin-top: .3rem; line-height: 1.8; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty h3 { font-family: var(--font-h); color: var(--text); margin-bottom: .5rem; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+    .dash-grid  { grid-template-columns: 1fr 1fr; }
+    nav { padding: 0 1.25rem; }
+    .section { padding: 2rem 1.25rem; }
+    .hero { padding: 5rem 1.25rem 3rem; }
+    .hero h1 { font-size: 2.5rem; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .dash-grid  { grid-template-columns: 1fr; }
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">SkillSwap</div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showPage('home')">Home</button>
+    <button class="nav-link" onclick="showPage('skills')">Skills</button>
+    <button class="nav-link" onclick="showPage('users')">Community</button>
+    <button class="nav-link" onclick="showPage('sessions')">Sessions</button>
+    <button class="nav-link" onclick="showPage('leaderboard')">Leaderboard</button>
+    <button class="nav-link" onclick="showPage('notifications')">Notifications</button>
+  </div>
+  <button class="nav-cta" onclick="showPage('profile')">My Profile</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-badge">✦ No money. Only knowledge.</div>
+    <h1>Learn by Teaching,<br><span>Grow Together</span></h1>
+    <p>SkillSwap connects students across India to exchange skills — teach what you know, learn what you want, completely free.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('skills')">Browse Skills →</button>
+      <button class="btn-ghost" onclick="showPage('users')">Meet the Community</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-users">50</div><div class="stat-label">Active Members</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-skills">25</div><div class="stat-label">Skills Available</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-sessions">20</div><div class="stat-label">Sessions Completed</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-rating">4.67★</div><div class="stat-label">Average Rating</div></div>
+  </div>
+
+  <!-- Popular skills preview -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Popular Skills</div>
+      <button class="section-link" onclick="showPage('skills')">View all →</button>
+    </div>
+    <div class="cards-grid" id="home-skills"></div>
+  </div>
+
+  <!-- Top community members -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Top Community Members</div>
+      <button class="section-link" onclick="showPage('leaderboard')">Full leaderboard →</button>
+    </div>
+    <div class="cards-grid" id="home-users"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: SKILLS
+══════════════════════════════════════════════ -->
+<div class="page" id="page-skills">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Browse Skills</div>
+      <span style="font-size:.85rem;color:var(--muted)" id="skills-count"></span>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="skill-search" placeholder="Search skills…" oninput="filterSkills()"/>
+      <select class="filter-select" id="skill-cat" onchange="filterSkills()">
+        <option value="">All Categories</option>
+        <option value="Technology">Technology</option>
+        <option value="Creative">Creative</option>
+        <option value="Business">Business</option>
+        <option value="Design">Design</option>
+        <option value="Lifestyle">Lifestyle</option>
+      </select>
+      <select class="filter-select" id="skill-role" onchange="filterSkills()">
+        <option value="">Teach or Learn</option>
+        <option value="teach">Has Teachers</option>
+        <option value="learn">Has Learners</option>
+      </select>
+      <select class="filter-select" id="skill-sort" onchange="filterSkills()">
+        <option value="popular">Most Wanted</option>
+        <option value="supply">Most Teachers</option>
+        <option value="name">A to Z</option>
+      </select>
+    </div>
+    <div class="cards-grid" id="skills-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: USERS / COMMUNITY
+══════════════════════════════════════════════ -->
+<div class="page" id="page-users">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Community Members</div>
+      <span style="font-size:.85rem;color:var(--muted)">50 students across India</span>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="user-search" placeholder="Search by name or college…" oninput="filterUsers()"/>
+      <select class="filter-select" id="user-college" onchange="filterUsers()">
+        <option value="">All Colleges</option>
+      </select>
+    </div>
+    <div class="cards-grid" id="users-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: SESSIONS
+══════════════════════════════════════════════ -->
+<div class="page" id="page-sessions">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">All Sessions</div>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="session-status" onchange="filterSessions()">
+        <option value="">All Statuses</option>
+        <option value="completed">Completed</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="rescheduled">Rescheduled</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Teacher</th><th>Learner</th><th>Skill</th><th>Date & Time</th><th>Status</th></tr>
+        </thead>
+        <tbody id="sessions-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: LEADERBOARD
+══════════════════════════════════════════════ -->
+<div class="page" id="page-leaderboard">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Leaderboard</div>
+      <span style="font-size:.85rem;color:var(--muted)">Ranked by average rating</span>
+    </div>
+    <div class="table-wrap" id="lb-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: NOTIFICATIONS
+══════════════════════════════════════════════ -->
+<div class="page" id="page-notifications">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Notifications</div>
+      <span style="font-size:.85rem;color:var(--muted)" id="notif-count-label"></span>
+    </div>
+    <div class="table-wrap" id="notif-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: PROFILE (Arjun Iyer — User 1)
+══════════════════════════════════════════════ -->
+<div class="page" id="page-profile">
+  <div class="section">
+    <div class="profile-hero">
+      <div class="profile-avatar">AI</div>
+      <div>
+        <div class="profile-name">Arjun Iyer</div>
+        <div class="profile-meta">
+          @arjun_iyer &nbsp;·&nbsp; IIT Madras &nbsp;·&nbsp; Chennai<br>
+          arjun.iyer@iitm.ac.in &nbsp;·&nbsp; 9876543210
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-label">Sessions Completed</div>
+        <div class="dash-card-value" style="color:var(--accent3)">1</div>
+        <div class="dash-card-sub">as teacher</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Average Rating</div>
+        <div class="dash-card-value" style="color:var(--accent2)">5.0 ★</div>
+        <div class="dash-card-sub">1 review received</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Skills</div>
+        <div class="dash-card-value" style="color:var(--accent)">2</div>
+        <div class="dash-card-sub">teaching: Python, ML</div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-bottom:1rem">
+      <div class="section-title" style="font-size:1.1rem">Skills I Teach</div>
+    </div>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem">
+      <div class="tag tag-teach" style="font-size:.85rem;padding:.4rem .9rem">Python Programming — Advanced</div>
+      <div class="tag tag-teach" style="font-size:.85rem;padding:.4rem .9rem">Machine Learning — Advanced</div>
+    </div>
+
+    <div class="section-header" style="margin-bottom:1rem">
+      <div class="section-title" style="font-size:1.1rem">My Sessions</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Session</th><th>Learner</th><th>Skill</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>#401</td>
+            <td>Priya Reddy</td>
+            <td>Python Programming</td>
+            <td>Nov 12, 2025</td>
+            <td><span class="badge badge-completed">completed</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:2rem">
+      <div class="section-header" style="margin-bottom:1rem">
+        <div class="section-title" style="font-size:1.1rem">Feedback Received</div>
+      </div>
+      <div class="table-wrap">
+        <div style="padding:1.25rem">
+          <div style="font-size:.88rem;line-height:1.7;color:var(--muted)">
+            "arjun explained python basics very clearly. great session!" <br>
+            <span style="color:var(--accent2)">★★★★★</span> — Priya Reddy
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA (mirrors your SQL insertions)
+// ══════════════════════════════════════════════
+
+const SKILLS = [
+  { id:101, name:'Python Programming',        desc:'Learn to code in Python from basics to advanced with projects.',          cat:'Technology', icon:'🐍', learners:4, teachers:1 },
+  { id:102, name:'Data Analysis',             desc:'Analyze datasets using Excel, SQL, and Python for insights.',            cat:'Technology', icon:'📊', learners:1, teachers:2 },
+  { id:103, name:'Public Speaking',           desc:'Build confidence and communication skills for effective speaking.',      cat:'Business',   icon:'🎤', learners:1, teachers:0 },
+  { id:104, name:'Machine Learning',          desc:'Understand ML algorithms and build predictive models.',                  cat:'Technology', icon:'🤖', learners:1, teachers:3 },
+  { id:105, name:'Graphic Design',            desc:'Create visuals using Adobe Photoshop, Illustrator, and Canva.',         cat:'Creative',   icon:'🎨', learners:1, teachers:1 },
+  { id:106, name:'Digital Marketing',         desc:'Learn SEO, social media, and content marketing strategies.',            cat:'Business',   icon:'📱', learners:0, teachers:1 },
+  { id:107, name:'Web Development',           desc:'Develop responsive websites using HTML, CSS, and JavaScript.',          cat:'Technology', icon:'💻', learners:2, teachers:1 },
+  { id:108, name:'Content Writing',           desc:'Write engaging and SEO-friendly blogs, articles, and posts.',           cat:'Creative',   icon:'✍️', learners:0, teachers:1 },
+  { id:109, name:'Video Editing',             desc:'Edit videos using Premiere Pro and CapCut for social media.',           cat:'Creative',   icon:'🎬', learners:1, teachers:0 },
+  { id:110, name:'UI/UX Design',              desc:'Design user-friendly interfaces and wireframes using Figma.',           cat:'Design',     icon:'🖌️', learners:2, teachers:1 },
+  { id:111, name:'Android Development',       desc:'Build mobile apps using Kotlin and Android Studio.',                   cat:'Technology', icon:'📲', learners:1, teachers:1 },
+  { id:112, name:'Data Visualization',        desc:'Create dashboards using Tableau, Power BI, and Matplotlib.',           cat:'Technology', icon:'📈', learners:1, teachers:2 },
+  { id:113, name:'English Communication',     desc:'Improve spoken and written English for work and more.',                cat:'Business',   icon:'🗣️', learners:1, teachers:1 },
+  { id:114, name:'Leadership Skills',         desc:'Learn to lead teams, manage conflicts, and delegate tasks.',            cat:'Business',   icon:'👑', learners:2, teachers:1 },
+  { id:115, name:'Creative Writing',          desc:'Develop storytelling, poetry, and narrative writing skills.',          cat:'Creative',   icon:'📝', learners:1, teachers:1 },
+  { id:116, name:'Photography',               desc:'Capture portraits and landscapes using DSLR and smartphone.',          cat:'Creative',   icon:'📷', learners:0, teachers:1 },
+  { id:117, name:'Financial Literacy',        desc:'Learn personal finance, budgeting, and investment basics.',            cat:'Business',   icon:'💰', learners:1, teachers:1 },
+  { id:118, name:'Java Programming',          desc:'Understand object-oriented concepts using Java.',                      cat:'Technology', icon:'☕', learners:1, teachers:1 },
+  { id:119, name:'SQL and Databases',         desc:'Design and query relational databases like MySQL and PostgreSQL.',     cat:'Technology', icon:'🗄️', learners:1, teachers:1 },
+  { id:120, name:'Cybersecurity Basics',      desc:'Learn ethical hacking and protection against digital threats.',        cat:'Technology', icon:'🔐', learners:1, teachers:1 },
+  { id:121, name:'Yoga and Meditation',       desc:'Practice yoga asanas and mindfulness for focus and health.',          cat:'Lifestyle',  icon:'🧘', learners:0, teachers:2 },
+  { id:122, name:'Entrepreneurship',          desc:'Understand how to start and scale a business or startup.',            cat:'Business',   icon:'🚀', learners:1, teachers:1 },
+  { id:123, name:'Foreign Language — French', desc:'Learn basic French for conversation and travel.',                     cat:'Lifestyle',  icon:'🇫🇷', learners:1, teachers:0 },
+  { id:124, name:'Event Management',          desc:'Plan and organize college and cultural events effectively.',           cat:'Business',   icon:'🎪', learners:0, teachers:1 },
+  { id:125, name:'Social Media Content',      desc:'Create Instagram Reels and YouTube videos that engage audiences.',    cat:'Creative',   icon:'🎥', learners:0, teachers:1 },
+];
+
+const USERS = [
+  { id:1,  name:'Arjun Iyer',       uname:'arjun_iyer',       college:'IIT Madras',     loc:'Chennai',   teaches:['Python','Machine Learning'],     avg:5.0  },
+  { id:2,  name:'Priya Reddy',      uname:'priya_reddy',      college:'IIT Madras',     loc:'Chennai',   learns:['Python','Public Speaking'],        avg:null },
+  { id:3,  name:'Rahul Verma',      uname:'rahul_verma',      college:'IIT Delhi',      loc:'New Delhi', teaches:['Data Analysis','Machine Learning'],avg:4.0  },
+  { id:4,  name:'Aisha Khan',       uname:'aisha_khan',       college:'IIT Delhi',      loc:'New Delhi', learns:['Python','Graphic Design'],         avg:null },
+  { id:5,  name:'Rohan Mehta',      uname:'rohan_mehta',      college:'BITS Pilani',    loc:'Pilani',    teaches:['Digital Marketing','Web Dev'],    avg:5.0  },
+  { id:6,  name:'Neha Sharma',      uname:'neha_sharma',      college:'BITS Pilani',    loc:'Pilani',    learns:['Web Dev','Video Editing'],         avg:null },
+  { id:7,  name:'Aditya Patel',     uname:'aditya_patel',     college:'IIT Bombay',     loc:'Mumbai',    teaches:['UI/UX Design','Data Analysis'],   avg:null },
+  { id:8,  name:'Kavya Nair',       uname:'kavya_nair',       college:'IIT Bombay',     loc:'Mumbai',    learns:['Python','Android Dev'],            avg:null },
+  { id:9,  name:'Amit Singh',       uname:'amit_singh',       college:'JIIT-62',        loc:'Noida',     teaches:['Data Viz','English Comm'],        avg:4.0  },
+  { id:10, name:'Riya Gupta',       uname:'riya_gupta',       college:'JIIT-62',        loc:'Noida',     learns:['Leadership','Creative Writing'],   avg:null },
+  { id:11, name:'Tanmay Shukla',    uname:'tanmay_shukla',    college:'JIIT-128',       loc:'Noida',     teaches:['Photography','Financial Lit'],    avg:5.0  },
+  { id:12, name:'Isha Agarwal',     uname:'isha_agarwal',     college:'JIIT-128',       loc:'Noida',     learns:['Java','SQL'],                      avg:null },
+  { id:13, name:'Siddharth Jain',   uname:'siddharth_jain',   college:'Thapar',         loc:'Patiala',   teaches:['Cybersecurity','Yoga'],           avg:5.0  },
+  { id:14, name:'Simran Bhalla',    uname:'simran_bhalla',    college:'Thapar',         loc:'Patiala',   learns:['Entrepreneurship','French'],       avg:null },
+  { id:15, name:'Karan Malhotra',   uname:'karan_malhotra',   college:'DU',             loc:'New Delhi', teaches:['Event Mgmt','Social Media'],      avg:5.0  },
+  { id:16, name:'Megha Bansal',     uname:'megha_bansal',     college:'DU',             loc:'New Delhi', learns:['Python','Web Dev'],                avg:null },
+  { id:17, name:'Vishal Shetty',    uname:'vishal_shetty',    college:'VIT',            loc:'Vellore',   teaches:['Machine Learning','Graphic Des'], avg:null },
+  { id:18, name:'Ananya Menon',     uname:'ananya_menon',     college:'VIT',            loc:'Vellore',   learns:['Video Editing','UI/UX'],           avg:null },
+  { id:19, name:'Sourabh Raj',      uname:'sourabh_raj',      college:'NIT',            loc:'Warangal',  teaches:['Android Dev','Data Viz'],         avg:4.0  },
+  { id:20, name:'Tanya Kapoor',     uname:'tanya_kapoor',     college:'NIT',            loc:'Warangal',  learns:['English Comm','Leadership'],       avg:null },
+];
+
+const SESSIONS = [
+  { id:401, teacher:'Arjun Iyer',      learner:'Priya Reddy',     skill:'Python Programming',  date:'2025-11-12 10:30', status:'completed'   },
+  { id:402, teacher:'Rahul Verma',     learner:'Aisha Khan',      skill:'Machine Learning',    date:'2025-11-13 15:30', status:'completed'   },
+  { id:403, teacher:'Rohan Mehta',     learner:'Neha Sharma',     skill:'Graphic Design',      date:'2025-11-14 09:30', status:'completed'   },
+  { id:404, teacher:'Aditya Patel',    learner:'Kavya Nair',      skill:'Digital Marketing',   date:'2025-11-15 16:30', status:'scheduled'   },
+  { id:405, teacher:'Amit Singh',      learner:'Riya Gupta',      skill:'Web Development',     date:'2025-11-14 10:30', status:'completed'   },
+  { id:406, teacher:'Tanmay Shukla',   learner:'Isha Agarwal',    skill:'Content Writing',     date:'2025-11-14 15:30', status:'completed'   },
+  { id:407, teacher:'Siddharth Jain',  learner:'Simran Bhalla',   skill:'Video Editing',       date:'2025-11-15 09:30', status:'scheduled'   },
+  { id:408, teacher:'Karan Malhotra',  learner:'Megha Bansal',    skill:'UI/UX Design',        date:'2025-11-13 13:30', status:'scheduled'   },
+  { id:409, teacher:'Vishal Shetty',   learner:'Ananya Menon',    skill:'Android Development', date:'2025-11-16 10:30', status:'scheduled'   },
+  { id:410, teacher:'Sourabh Raj',     learner:'Tanya Kapoor',    skill:'Data Visualization',  date:'2025-11-16 14:30', status:'completed'   },
+  { id:411, teacher:'Manish Pandey',   learner:'Sakshi Mishra',   skill:'English Comm',        date:'2025-11-17 10:30', status:'scheduled'   },
+  { id:412, teacher:'Deepak Yadav',    learner:'Shruti Rajput',   skill:'Leadership Skills',   date:'2025-11-17 15:30', status:'scheduled'   },
+  { id:413, teacher:'Naman Bhargava',  learner:'Pooja Tiwari',    skill:'Creative Writing',    date:'2025-11-18 09:30', status:'completed'   },
+  { id:414, teacher:'Harshita Rana',   learner:'Rajat Das',       skill:'Photography',         date:'2025-11-18 14:30', status:'scheduled'   },
+  { id:415, teacher:'Alok Sen',        learner:'Riya Dutta',      skill:'Financial Literacy',  date:'2025-11-19 09:30', status:'cancelled'   },
+  { id:416, teacher:'Rakesh Kumar',    learner:'Shreya Pillai',   skill:'Java Programming',    date:'2025-11-19 15:30', status:'completed'   },
+  { id:417, teacher:'Devansh Arora',   learner:'Tanya Joseph',    skill:'SQL and Databases',   date:'2025-11-20 09:30', status:'completed'   },
+  { id:418, teacher:'Abhishek Rout',   learner:'Divya Reddy',     skill:'Cybersecurity Basics',date:'2025-11-20 13:30', status:'rescheduled' },
+  { id:419, teacher:'Vivek Naidu',     learner:'Aarushi Kaur',    skill:'Yoga and Meditation', date:'2025-11-21 11:30', status:'scheduled'   },
+  { id:420, teacher:'Sandeep Patel',   learner:'Nikita Jain',     skill:'Entrepreneurship',    date:'2025-11-21 15:30', status:'completed'   },
+];
+
+const NOTIFICATIONS = [
+  { id:601, user:'Priya Reddy',    msg:'Your Python session with Arjun Iyer has been completed.',                  read:true  },
+  { id:602, user:'Rahul Verma',    msg:'Machine Learning session with Aisha Khan completed successfully.',         read:true  },
+  { id:603, user:'Neha Sharma',    msg:'Graphic Design session with Rohan Mehta completed successfully.',          read:true  },
+  { id:604, user:'Kavya Nair',     msg:'Your C++ session with Aditya Patel is scheduled for 15th Nov 2025.',      read:false },
+  { id:605, user:'Riya Gupta',     msg:'Web Development session with Rahul Verma completed successfully.',         read:true  },
+  { id:606, user:'Isha Agarwal',   msg:'Data Analysis session with Neha Sharma completed successfully.',           read:true  },
+  { id:607, user:'Simran Bhalla',  msg:'Public Speaking session with Kavya Nair scheduled for 15th Nov 2025.',    read:false },
+  { id:608, user:'Megha Bansal',   msg:'Your C++ DSA session with Rohit Singh completed successfully.',            read:true  },
+  { id:609, user:'Ananya Menon',   msg:'Digital Marketing session with Sneha Joshi is scheduled tomorrow.',       read:false },
+  { id:610, user:'Tanya Kapoor',   msg:'Creative Writing session with Manisha Das completed successfully.',        read:true  },
+  { id:611, user:'Sakshi Mishra',  msg:'Leadership workshop with Vivek Kumar scheduled for 17th Nov 2025.',       read:false },
+  { id:612, user:'Shruti Rajput',  msg:'Public Speaking session with Ravi Rao completed successfully.',           read:true  },
+  { id:613, user:'Pooja Tiwari',   msg:'Python Basics session with Arjun Iyer completed successfully.',           read:true  },
+  { id:614, user:'Rajat Das',      msg:'Web Design session with Kavita Singh rescheduled to 18th Nov.',           read:false },
+  { id:615, user:'Riya Dutta',     msg:'Data Visualization session with Amit Patel cancelled.',                   read:true  },
+  { id:616, user:'Shreya Pillai',  msg:'SQL and Database Design session with Anjali Sharma completed.',           read:true  },
+  { id:617, user:'Tanya Joseph',   msg:'Leadership Principles workshop with Krishna Reddy completed.',             read:true  },
+  { id:618, user:'Divya Reddy',    msg:'Communication Skills session with Meena Kumari rescheduled.',             read:false },
+  { id:619, user:'Aarushi Kaur',   msg:'Career Guidance session with Arnav Bansal scheduled for 21st Nov.',      read:false },
+  { id:620, user:'Nikita Jain',    msg:'Photography session with Deepak Sharma completed successfully.',          read:true  },
+];
+
+const LEADERBOARD = [
+  { rank:1, name:'Arjun Iyer',     college:'IIT Madras',  rating:5.0,  reviews:1, taught:1 },
+  { rank:2, name:'Rohan Mehta',    college:'BITS Pilani', rating:5.0,  reviews:1, taught:1 },
+  { rank:3, name:'Tanmay Shukla',  college:'JIIT-128',    rating:5.0,  reviews:1, taught:1 },
+  { rank:4, name:'Siddharth Jain', college:'Thapar',      rating:5.0,  reviews:1, taught:0 },
+  { rank:5, name:'Karan Malhotra', college:'DU',          rating:5.0,  reviews:1, taught:0 },
+  { rank:6, name:'Naman Bhargava', college:'IIT Kanpur',  rating:5.0,  reviews:1, taught:1 },
+  { rank:7, name:'Devansh Arora',  college:'IIT Roorkee', rating:5.0,  reviews:1, taught:1 },
+  { rank:8, name:'Sandeep Patel',  college:'MNNIT',       rating:5.0,  reviews:1, taught:1 },
+  { rank:9, name:'Rahul Verma',    college:'IIT Delhi',   rating:4.0,  reviews:1, taught:1 },
+  { rank:10,name:'Amit Singh',     college:'JIIT-62',     rating:4.0,  reviews:1, taught:1 },
+  { rank:11,name:'Sourabh Raj',    college:'NIT',         rating:4.0,  reviews:1, taught:1 },
+  { rank:12,name:'Rakesh Kumar',   college:'NIT',         rating:4.0,  reviews:1, taught:1 },
+];
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+
+const AVATAR_COLORS = [
+  ['#7c6af7','#5a4ed4'],['#f7c66a','#e0a83a'],['#6af7c6','#3adaaa'],
+  ['#f76a9a','#d44a78'],['#6ab4f7','#3a8cd4'],['#c66af7','#a44ad4'],
+];
+
+function avatarColor(i) {
+  const c = AVATAR_COLORS[i % AVATAR_COLORS.length];
+  return `background:linear-gradient(135deg,${c[0]},${c[1]})`;
+}
+
+function initials(name) {
+  return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+}
+
+function stars(r) {
+  if (!r) return '<span style="color:var(--muted);font-size:.8rem">No reviews yet</span>';
+  const full = Math.floor(r), half = r % 1 >= .5;
+  let s = '';
+  for (let i=0;i<full;i++) s += '★';
+  if (half) s += '½';
+  return `<span style="color:var(--accent2)">${s}</span> <span style="color:var(--muted);font-size:.8rem">${r.toFixed(1)}</span>`;
+}
+
+function fmtDate(dt) {
+  const d = new Date(dt.replace(' ','T'));
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+    + ' · ' + d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const link = [...document.querySelectorAll('.nav-link')].find(l => l.getAttribute('onclick')?.includes(`'${name}'`));
+  if (link) link.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════
+// RENDER: HOME
+// ══════════════════════════════════════════════
+
+function renderHomeSkills() {
+  const top = [...SKILLS].sort((a,b) => (b.learners + b.teachers) - (a.learners + a.teachers)).slice(0,6);
+  document.getElementById('home-skills').innerHTML = top.map(s => skillCard(s)).join('');
+}
+
+function renderHomeUsers() {
+  const top = LEADERBOARD.slice(0,6);
+  document.getElementById('home-users').innerHTML = top.map((u,i) => `
+    <div class="user-card">
+      <div class="user-avatar" style="${avatarColor(i)}">${initials(u.name)}</div>
+      <div class="user-name">${u.name}</div>
+      <div class="user-college">${u.college}</div>
+      <div class="stars">${stars(u.rating)}</div>
+      <div style="margin-top:.75rem;font-size:.78rem;color:var(--muted)">${u.taught} session${u.taught!==1?'s':''} taught</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+// RENDER: SKILLS
+// ══════════════════════════════════════════════
+
+function skillCard(s) {
+  return `
+    <div class="skill-card">
+      <div class="skill-card-top">
+        <div class="skill-icon">${s.icon}</div>
+        <div class="skill-cat">${s.cat}</div>
+      </div>
+      <div class="skill-name">${s.name}</div>
+      <div class="skill-desc">${s.desc}</div>
+      <div class="skill-footer">
+        <span>👩‍🏫 ${s.teachers} teacher${s.teachers!==1?'s':''}</span>
+        <span>🎓 ${s.learners} learner${s.learners!==1?'s':''}</span>
+      </div>
+    </div>`;
+}
+
+function renderSkills(list) {
+  const g = document.getElementById('skills-grid');
+  const c = document.getElementById('skills-count');
+  g.innerHTML = list.length ? list.map(skillCard).join('') : '<div class="empty"><div class="empty-icon">🔍</div><h3>No skills found</h3><p>Try a different search or category</p></div>';
+  if (c) c.textContent = `${list.length} skill${list.length!==1?'s':''}`;
+}
+
+function filterSkills() {
+  const q   = document.getElementById('skill-search').value.toLowerCase();
+  const cat = document.getElementById('skill-cat').value;
+  const role = document.getElementById('skill-role').value;
+  const sort = document.getElementById('skill-sort').value;
+  const filtered = SKILLS.filter(s =>
+    (!q   || s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q)) &&
+    (!cat || s.cat === cat) &&
+    (!role || s[role === 'teach' ? 'teachers' : 'learners'] > 0)
+  );
+  const sorted = filtered.sort((a,b) => {
+    if (sort === 'supply') return b.teachers - a.teachers || b.learners - a.learners || a.name.localeCompare(b.name);
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    return b.learners - a.learners || b.teachers - a.teachers || a.name.localeCompare(b.name);
+  });
+  renderSkills(sorted);
+}
+
+// ══════════════════════════════════════════════
+// RENDER: USERS
+// ══════════════════════════════════════════════
+
+function renderUsers(list) {
+  document.getElementById('users-grid').innerHTML = list.length
+    ? list.map((u,i) => `
+        <div class="user-card">
+          <div class="user-avatar" style="${avatarColor(u.id)}">${initials(u.name)}</div>
+          <div class="user-name">${u.name}</div>
+          <div class="user-college">${u.college} · ${u.loc}</div>
+          <div class="user-tags">
+            ${(u.teaches||[]).map(t=>`<span class="tag tag-teach">Teaches ${t}</span>`).join('')}
+            ${(u.learns||[]).map(t=>`<span class="tag tag-learn">Learns ${t}</span>`).join('')}
+          </div>
+          <div class="stars" style="margin-top:.75rem">${stars(u.avg)}</div>
+        </div>`)
+      .join('')
+    : '<div class="empty"><div class="empty-icon">👥</div><h3>No members found</h3></div>';
+}
+
+function populateCollegeFilter() {
+  const sel = document.getElementById('user-college');
+  const colleges = [...new Set(USERS.map(u=>u.college))].sort();
+  colleges.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+}
+
+function filterUsers() {
+  const q   = document.getElementById('user-search').value.toLowerCase();
+  const col = document.getElementById('user-college').value;
+  renderUsers(USERS.filter(u =>
+    (!q   || u.name.toLowerCase().includes(q) || u.college.toLowerCase().includes(q)) &&
+    (!col || u.college === col)
+  ));
+}
+
+// ══════════════════════════════════════════════
+// RENDER: SESSIONS
+// ══════════════════════════════════════════════
+
+function renderSessions(list) {
+  document.getElementById('sessions-tbody').innerHTML = list.map(s => `
+    <tr>
+      <td style="color:var(--muted)">#${s.id}</td>
+      <td><strong>${s.teacher}</strong></td>
+      <td>${s.learner}</td>
+      <td>${s.skill}</td>
+      <td style="font-size:.82rem;color:var(--muted)">${fmtDate(s.date)}</td>
+      <td><span class="badge badge-${s.status}">${s.status}</span></td>
+    </tr>`).join('');
+}
+
+function filterSessions() {
+  const st = document.getElementById('session-status').value;
+  renderSessions(SESSIONS.filter(s => !st || s.status === st));
+}
+
+// ══════════════════════════════════════════════
+// RENDER: LEADERBOARD
+// ══════════════════════════════════════════════
+
+function renderLeaderboard() {
+  const rankClass = r => r===1?'gold':r===2?'silver':r===3?'bronze':'';
+  document.getElementById('lb-list').innerHTML = LEADERBOARD.map((u,i) => `
+    <div class="lb-row">
+      <div class="lb-rank ${rankClass(u.rank)}">${u.rank}</div>
+      <div class="lb-avatar" style="${avatarColor(i)}">${initials(u.name)}</div>
+      <div class="lb-info">
+        <div class="lb-name">${u.name}</div>
+        <div class="lb-college">${u.college} · ${u.taught} session${u.taught!==1?'s':''} taught</div>
+      </div>
+      <div class="lb-rating">
+        <span style="color:var(--accent2)">★</span> ${u.rating.toFixed(1)}
+        <span style="font-size:.75rem;color:var(--muted);font-weight:400">(${u.reviews} review${u.reviews!==1?'s':''})</span>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// RENDER: NOTIFICATIONS
+// ══════════════════════════════════════════════
+
+function renderNotifications() {
+  const unread = NOTIFICATIONS.filter(n=>!n.read).length;
+  document.getElementById('notif-count-label').textContent = `${unread} unread`;
+  document.getElementById('notif-list').innerHTML = NOTIFICATIONS.map(n => `
+    <div class="notif-item ${n.read?'':'unread'}">
+      <div class="notif-dot ${n.read?'read':''}"></div>
+      <div>
+        <div style="font-size:.78rem;color:var(--accent);margin-bottom:.2rem;font-weight:500">${n.user}</div>
+        <div class="notif-msg">${n.msg}</div>
+        <div class="notif-time">${n.read ? 'Read' : 'Unread'}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+
+(function init() {
+  renderHomeSkills();
+  renderHomeUsers();
+  renderSkills(SKILLS);
+  renderUsers(USERS);
+  populateCollegeFilter();
+  renderSessions(SESSIONS);
+  renderLeaderboard();
+  renderNotifications();
+})();
+</script>
+</body>
+</html>
